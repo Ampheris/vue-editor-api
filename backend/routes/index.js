@@ -2,6 +2,18 @@ var express = require('express');
 var router = express.Router();
 var search = require('../src/search.service')
 
+
+router.get('/', function (req, res, next) {
+    const data = {
+        data: {
+            msg: "Hello! Welcome to the API."
+        }
+    };
+
+    res.status(200).json(data);
+});
+
+
 router.post('/create', function (req, res, next) {
     try {
         let newData = req.params.data;
@@ -44,7 +56,6 @@ router.get('/getAllFiles',  function (req, res, next) {
             files: files
         }
     };
-
 
     res.status(200).json(data);
 });

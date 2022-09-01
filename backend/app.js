@@ -1,47 +1,22 @@
-const express = require("express");
-const app = express();
+const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
 const morgan = require('morgan');
 const cors = require('cors');
-const index = require("./routes")
-const bodyParser = require("body-parser");
-require('dotenv').config()
 
-const port = process.env.PORT || 1337;
+require('dotenv').config();
+
+const app = express();
+
+const api = require("./routes/index.js");
+const port = 1337;
 
 app.use(cors());
+app.options('*', cors());
 
-// This is middleware called for all routes.
-// Middleware takes three parameters.
-app.use((req, res, next) => {
-    console.log(req.method);
-    console.log(req.path);
-    next();
-});
+app.disable('x-powered-by');
 
-// Add routes for 404 and error handling
-// Catch 404 and forward to error handler
-// Put this last
-app.use((req, res, next) => {
-    var err = new Error("Not Found");
-    err.status = 404;
-    next(err);
-});
-
-app.use((err, req, res, next) => {
-    if (res.headersSent) {
-        return next(err);
-    }
-
-    res.status(err.status || 500).json({
-        "errors": [
-            {
-                "status": err.status,
-                "title": err.message,
-                "detail": err.message
-            }
-        ]
-    });
-});
+app.set("view engine", "ejs");
 
 // don't show the log when it is test
 if (process.env.NODE_ENV !== 'test') {
@@ -49,10 +24,12 @@ if (process.env.NODE_ENV !== 'test') {
     app.use(morgan('combined')); // 'combined' outputs the Apache style LOGs
 }
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use("/", api);
 
-app.use('/index', index);
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({extended: true}));
+const server = app.listen(port, () => {
+    console.log('auth api listening on port ' + port);
+});
 
-// Start up server
-app.listen(port, () => console.log(`Example API listening on port ${port}!`));
+module.exports = server;
