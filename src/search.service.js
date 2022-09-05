@@ -3,6 +3,7 @@
  */
 "use strict";
 const dbMongoAtlas = require('../db/database');
+const ObjectId = require('mongodb').ObjectId;
 
 /**
  * Find documents in an collection by matching search criteria.
@@ -46,16 +47,15 @@ async function createNewDocument(data) {
  *
  * @async
  *
+ * @param filter
  * @param {array} data        Data to update the new document
- * @param {string} filter     Contains the id of the document to be updated.
  * @throws Error when database operation fails.
- *
  * @return {Promise<array>} The resultset as an array.
  */
 async function updateDocument(filter, data) {
     const client = (await dbMongoAtlas.getDb()).client;
     const collection = (await dbMongoAtlas.getDb()).collection;
-    const res = await collection.updateOne(filter, data);
+    const res = await collection.updateOne(filter, data,);
 
     await client.close();
 
@@ -79,9 +79,9 @@ function createNewFile(fileData) {
 
 }
 
-async function updateFile(newFileData, fileId) {
+async function updateFile(filter, newFileData, ) {
     try {
-        return await updateDocument(fileId, newFileData);
+        return await updateDocument(filter , newFileData);
     } catch (err) {
         console.log(err);
     }

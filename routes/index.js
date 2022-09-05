@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var search = require('../src/search.service')
+const ObjectId = require('mongodb').ObjectId;
 
 
 router.get('/', function (req, res, next) {
@@ -14,7 +15,7 @@ router.get('/', function (req, res, next) {
 });
 
 
-router.post('/create',  async function (req, res, next) {
+router.post('/create', async function (req, res, next) {
     try {
         let name = req.body.name;
         let content = req.body.content;
@@ -32,20 +33,17 @@ router.post('/create',  async function (req, res, next) {
 
 router.put('/update/:id', async function (req, res, next) {
     try {
-        const fileId = req.params.id;
-        const updatedData = req.body.data;
-        await search.updateFile(updatedData, fileId);
+        const objId = new ObjectId(req.params.id);
+        const filter = { '_id': objId};
+        const data = {$set: {'content': req.body.content}};
+
+        let response = await search.updateFile(filter, data);
+        res.status(200).json(response);
+
     } catch (err) {
         res.json(err);
     }
 
-    const data = {
-        data: {
-            msg: "Trying to update file"
-        }
-    };
-
-    res.status(200).json(data);
 });
 
 router.get('/all', async function (req, res, next) {
