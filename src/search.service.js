@@ -29,7 +29,7 @@ async function findAll() {
  * @param {array} data        Data to create the new document
  * @throws Error when database operation fails.
  *
- * @return {Promise<array>} The resultset as an array.
+ * @return
  */
 async function createNewDocument(data) {
     const client = (await dbMongoAtlas.getDb()).client;
@@ -46,8 +46,6 @@ async function createNewDocument(data) {
  *
  * @async
  *
- * @param {string} dsn        DSN to connect to database.
- * @param {string} colName    Name of collection.
  * @param {array} data        Data to update the new document
  * @param {string} filter     Contains the id of the document to be updated.
  * @throws Error when database operation fails.
@@ -65,24 +63,16 @@ async function updateDocument(filter, data) {
 }
 
 async function getAllFiles() {
-    // Find using await
     try {
-        let res = await findAll();
-
-        console.log(res);
-        return res;
+        return await findAll();
     } catch (err) {
         console.log(err);
     }
 }
 
-async function createNewFile(fileData) {
-    // Find using await
+function createNewFile(fileData) {
     try {
-        let res = await createNewDocument(fileData);
-
-        console.log(res);
-        return res;
+        return createNewDocument(fileData);
     } catch (err) {
         console.log(err);
     }
@@ -90,12 +80,8 @@ async function createNewFile(fileData) {
 }
 
 async function updateFile(newFileData, fileId) {
-    // Find using await
     try {
-        let res = await updateDocument(fileId, newFileData);
-
-        console.log(res);
-        return res;
+        return await updateDocument(fileId, newFileData);
     } catch (err) {
         console.log(err);
     }

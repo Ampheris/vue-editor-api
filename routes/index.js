@@ -14,24 +14,23 @@ router.get('/', function (req, res, next) {
 });
 
 
-router.post('/create', async function (req, res, next) {
+router.post('/create',  async function (req, res, next) {
     try {
-        let newData = req.params.data;
-        await search.createNewFile(newData);
+        let name = req.body.name;
+        let content = req.body.content;
+        let newData = {'name': name, 'content': content}
+
+        let data = await search.createNewFile(newData);
+        console.log(`data: ${data}`);
+
+        res.status(200).json({_id: data.insertId, ...newData});
+
     } catch (err) {
         res.status(400).json(err);
     }
-
-    const data = {
-        data: {
-            msg: "Trying to create new file"
-        }
-    };
-
-    res.status(200).json(data);
 });
 
-router.post('/update/:id', async function (req, res, next) {
+router.put('/update/:id', async function (req, res, next) {
     try {
         const fileId = req.params.id;
         const updatedData = req.body.data;
@@ -51,7 +50,6 @@ router.post('/update/:id', async function (req, res, next) {
 
 router.get('/all', async function (req, res, next) {
     const files = await search.getAllFiles();
-    console.log(`Files: ${files}`);
 
     const data = {
         files: files
