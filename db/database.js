@@ -1,5 +1,5 @@
 const mongo = require("mongodb").MongoClient;
-const collectionName = "keys";
+const collectionName = "document";
 
 const database = {
     getDb: async function getDb() {
@@ -13,7 +13,8 @@ const database = {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
-        const db = await client.db();
+
+        const db = await client.db('textEditor');
         const collection = await db.collection(collectionName);
 
         return {

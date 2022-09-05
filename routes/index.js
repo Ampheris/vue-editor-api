@@ -14,11 +14,11 @@ router.get('/', function (req, res, next) {
 });
 
 
-router.post('/create', function (req, res, next) {
+router.post('/create', async function (req, res, next) {
     try {
         let newData = req.params.data;
-        search.createNewFile(newData);
-    }catch (err) {
+        await search.createNewFile(newData);
+    } catch (err) {
         res.status(400).json(err);
     }
 
@@ -31,12 +31,12 @@ router.post('/create', function (req, res, next) {
     res.status(200).json(data);
 });
 
-router.post('/update/:id', function (req, res, next) {
+router.post('/update/:id', async function (req, res, next) {
     try {
         const fileId = req.params.id;
         const updatedData = req.body.data;
-        search.updateFile(updatedData, fileId);
-    }catch (err) {
+        await search.updateFile(updatedData, fileId);
+    } catch (err) {
         res.json(err);
     }
 
@@ -49,12 +49,12 @@ router.post('/update/:id', function (req, res, next) {
     res.status(200).json(data);
 });
 
-router.get('/getAllFiles',  function (req, res, next) {
-    const files = search.getAllFiles();
+router.get('/all', async function (req, res, next) {
+    const files = await search.getAllFiles();
+    console.log(`Files: ${files}`);
+
     const data = {
-        data: {
-            files: files
-        }
+        files: files
     };
 
     res.status(200).json(data);
