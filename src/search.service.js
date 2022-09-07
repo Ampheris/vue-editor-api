@@ -1,3 +1,4 @@
+
 /**
  * Connect to the database and search using a criteria.
  */
@@ -18,6 +19,24 @@ async function findAll() {
     const collection = (await dbMongoAtlas.getDb()).collection;
     const res = await collection.find().toArray();
 
+    await client.close();
+
+    return res;
+}
+
+/**
+ * Find documents in an collection by matching search criteria.
+ *
+ * @async
+ * @throws Error when database operation fails.
+ *
+ * @return {Promise<array>} The resultset as an array.
+ */
+async function getSpecificDocument(id) {
+    const client = (await dbMongoAtlas.getDb()).client;
+    const collection = (await dbMongoAtlas.getDb()).collection;
+    const res = await collection.findOne({ _id: id },);
+    console.log(id);
     await client.close();
 
     return res;
@@ -70,13 +89,20 @@ async function getAllFiles() {
     }
 }
 
+async function getSpecificFile(id) {
+    try {
+        return getSpecificDocument(id);
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 function createNewFile(fileData) {
     try {
         return createNewDocument(fileData);
     } catch (err) {
         console.log(err);
     }
-
 }
 
 async function updateFile(filter, newFileData, ) {
@@ -87,4 +113,4 @@ async function updateFile(filter, newFileData, ) {
     }
 }
 
-module.exports = {getAllFiles, createNewFile, updateFile}
+module.exports = {getAllFiles, createNewFile, updateFile, getSpecificFile}
