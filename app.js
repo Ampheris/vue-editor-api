@@ -31,3 +31,5 @@ app.use("/api", api);
 const server = app.listen(port, () => {
     console.log('auth api listening on port ' + port);
 });
+
+module.exports = server;
