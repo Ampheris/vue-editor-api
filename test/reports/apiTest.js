@@ -36,7 +36,7 @@ describe('Testing the API routes', () => {
 
                 })
                 .catch(function (err) {
-                    console.error(err);
+                    console.error(`error: ${err}`);
                 })
                 .finally(async function () {
                     let response = await db.collection.insertOne(newDoc);
@@ -101,9 +101,8 @@ describe('Testing the API routes', () => {
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.an("object");
-                    res.body.file.length.should.be.above(0);
+                    res.body.file.should.contain(idOfDocument);
 
-                    console.log(JSON.stringify(res));
                     done();
                 });
         });

@@ -36,7 +36,6 @@ async function getSpecificDocument(id) {
     const client = (await dbMongoAtlas.getDb()).client;
     const collection = (await dbMongoAtlas.getDb()).collection;
     const res = await collection.findOne({ _id: id },);
-    console.log(id);
     await client.close();
 
     return res;
