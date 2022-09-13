@@ -22,7 +22,6 @@ router.post('/create', async function (req, res, next) {
         let newData = {'name': name, 'content': content}
 
         let data = await search.createNewFile(newData);
-        console.log(`data: ${newData.name}`);
 
         res.status(200).json({_id: data.insertId, ...newData});
 

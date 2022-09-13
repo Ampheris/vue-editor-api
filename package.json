@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "nyc --reporter=html --reporter=text --reporter=clover mocha 'test/**/*.js' --timeout 10000",
+    "test": "nyc --reporter=html --reporter=text --reporter=clover mocha 'test/**/*.js' --timeout 1000 --exit",
     "start": "nodemon app.js",
     "production": "NODE_ENV='production' node app.js",
     "clean": "rm -rf node_modules package-lock.json"
