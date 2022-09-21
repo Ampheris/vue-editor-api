@@ -6,9 +6,8 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-
+const httpServer = require("http").createServer(app);
 const api = require("./routes/index");
-
 const port = process.env.PORT || 1337;
 
 app.use(cors());
@@ -28,7 +27,26 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/api", api);
 
-const server = app.listen(port, () => {
+
+const io = require("socket.io")(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+io.sockets.on('connection', function(socket) {
+    socket.on('hello', (...args) => {
+        console.log('Hello from client ' + args);
+    });
+
+    socket.on('create', function(room) {
+        socket.join(room);
+        console.log(`A room has been created with id: ${room}`);
+    });
+});
+
+const server = httpServer.listen(port, () => {
     console.log('auth api listening on port ' + port);
 });
 
