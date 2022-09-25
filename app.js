@@ -37,13 +37,19 @@ const io = require("socket.io")(httpServer, {
 
 io.sockets.on('connection', function(socket) {
     socket.on('hello', (...args) => {
-        console.log('Hello from client ' + args);
+        console.log('Connected from client ' + args);
     });
 
     socket.on('create', function(room) {
         socket.join(room);
-        console.log(`A room has been created with id: ${room}`);
+        console.log(`A room has been joined with id: ${room}`);
     });
+
+    socket.on('liveUpdate', (data) => {
+        console.log('Data has been recieved,');
+        socket.to(data['_id']).emit("doc", data);
+        console.log(`data transmitted: ${data}`);
+    })
 });
 
 const server = httpServer.listen(port, () => {
