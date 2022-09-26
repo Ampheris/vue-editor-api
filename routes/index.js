@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 var search = require('../src/search.service')
 const ObjectId = require('mongodb').ObjectId;
+const auth = require("../models/auth.js");
 
 router.get('/', function (req, res, next) {
     const data = {
@@ -14,7 +15,10 @@ router.get('/', function (req, res, next) {
 });
 
 
-router.post('/create', async function (req, res, next) {
+router.post('/create',
+    (req, res, next) =>
+        auth.checkToken(req, res, next),
+    async function (req, res, next) {
     try {
         let name = req.body.name;
         let content = req.body.content;
@@ -29,7 +33,10 @@ router.post('/create', async function (req, res, next) {
     }
 });
 
-router.put('/update/:id', async function (req, res, next) {
+router.put('/update/:id',
+    (req, res, next) =>
+        auth.checkToken(req, res, next),
+    async function (req, res, next) {
     try {
         const objId = new ObjectId(req.params.id);
         const filter = {'_id': objId};
@@ -44,7 +51,10 @@ router.put('/update/:id', async function (req, res, next) {
 
 });
 
-router.get('/all', async function (req, res, next) {
+router.get('/all',
+    (req, res, next) =>
+        auth.checkToken(req, res, next),
+    async function (req, res, next) {
     const files = await search.getAllFiles();
 
     const data = {
@@ -54,7 +64,11 @@ router.get('/all', async function (req, res, next) {
     res.status(200).json(data);
 });
 
-router.get('/get/:id', async function (req, res, next) {
+router.get('/get/:id',
+    (req, res, next) =>
+        auth.checkToken(req, res, next),
+    async function (req, res, next) {
+
     const objId = new ObjectId(req.params.id);
     const specificFile = await search.getSpecificFile(objId);
 
@@ -66,13 +80,10 @@ router.get('/get/:id', async function (req, res, next) {
 });
 
 
-router.post('/register', async function (req, res, next) {
-    res.status(200);
-});
+router.post('/login', (req, res) =>
+    auth.login(res, req.body));
 
-
-router.get('/login', async function (req, res, next) {
-    res.status(200);
-});
+router.post('/register', (req, res) =>
+    auth.register(res, req.body));
 
 module.exports = router;
