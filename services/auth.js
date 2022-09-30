@@ -1,17 +1,15 @@
 const database = require("../db/database.js");
 const hat = require("hat");
 const validator = require("email-validator");
-
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
 const jwtSecret = process.env.JWT_SECRET;
 
 const auth = {
     login: async function (res, body) {
         const email = body.email;
         const password = body.password;
-        const apiKey = body.api_key;
+        console.log(`Trying to log in: ${body.email}`);
 
         if (!email || !password) {
             return res.status(401).json({
@@ -27,7 +25,7 @@ const auth = {
         let db;
 
         try {
-            db = await database.getDb();
+            db = await database.getDb('user');
 
             const filter = {
                 key: apiKey, users: {
@@ -72,7 +70,9 @@ const auth = {
     register: async function (res, body) {
         const email = body.email;
         const password = body.password;
-        const apiKey = body.api_key;
+        let db;
+
+        console.log(`Trying to register: ${email} ${password}`);
 
         if (!email || !password) {
             return res.status(401).json({
@@ -97,28 +97,33 @@ const auth = {
                 });
             }
 
-            let db;
-
             try {
-                db = await database.getDb();
+                db = await database.getDb('user');
 
-                let filter = {key: apiKey};
-                let updateDoc = {
-                    $push: {
-                        users: {
-                            email: email,
-                            password: hash,
+                let filter = {'email': email};
+                let updateDoc = {$set: {'content': hash}};
+
+                const userExist = await db.collection.findOne({ email: email },);
+
+                if (!userExist) {
+                    await db.collection.insertOne({'email': email, 'password': password});
+
+                    console.log(`added user with ${email} ${hash}`);
+
+                    return res.status(201).json({
+                        data: {
+                            message: "User successfully registered."
                         }
-                    }
-                };
+                    });
 
-                await db.collection.updateOne(filter, updateDoc);
+                } else {
+                    return res.status(201).json({
+                        data: {
+                            message: "User already exist."
+                        }
+                    });
+                }
 
-                return res.status(201).json({
-                    data: {
-                        message: "User successfully registered."
-                    }
-                });
             } catch (e) {
                 return res.status(500).json({
                     errors: {
@@ -133,29 +138,10 @@ const auth = {
             }
         });
     },
-    checkAPIKey: function (req, res, next) {
-        if (req.path === '/') {
-            return next();
-        }
-
-        if (req.path === '/api_key') {
-            return next();
-        }
-
-        if (req.path === '/api_key/confirmation') {
-            return next();
-        }
-
-        if (req.path === '/api_key/deregister') {
-            return next();
-        }
-
-        auth.isValidAPIKey(req.query.api_key || req.body.api_key, next, req.path, res);
-    },
 
     isValidAPIKey: async function (apiKey, next, path, res) {
         try {
-            const db = await database.getDb();
+            const db = await database.getDb('user');
 
             const filter = {key: apiKey};
 
@@ -200,7 +186,7 @@ const auth = {
         }
 
         try {
-            const db = await database.getDb();
+            const db = await database.getDb('user');
 
             const filter = {email: email};
 

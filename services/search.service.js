@@ -4,7 +4,6 @@
  */
 "use strict";
 const dbMongoAtlas = require('../db/database');
-const ObjectId = require('mongodb').ObjectId;
 
 /**
  * Find documents in an collection by matching search criteria.
@@ -15,8 +14,8 @@ const ObjectId = require('mongodb').ObjectId;
  * @return {Promise<array>} The resultset as an array.
  */
 async function findAll() {
-    const client = (await dbMongoAtlas.getDb()).client;
-    const collection = (await dbMongoAtlas.getDb()).collection;
+    const client = (await dbMongoAtlas.getDb('document')).client;
+    const collection = (await dbMongoAtlas.getDb('document')).collection;
     const res = await collection.find().toArray();
 
     await client.close();
@@ -33,8 +32,8 @@ async function findAll() {
  * @return {Promise<array>} The resultset as an array.
  */
 async function getSpecificDocument(id) {
-    const client = (await dbMongoAtlas.getDb()).client;
-    const collection = (await dbMongoAtlas.getDb()).collection;
+    const client = (await dbMongoAtlas.getDb('document')).client;
+    const collection = (await dbMongoAtlas.getDb('document')).collection;
     const res = await collection.findOne({ _id: id },);
     await client.close();
 
@@ -51,8 +50,8 @@ async function getSpecificDocument(id) {
  * @return
  */
 async function createNewDocument(data) {
-    const client = (await dbMongoAtlas.getDb()).client;
-    const collection = (await dbMongoAtlas.getDb()).collection;
+    const client = (await dbMongoAtlas.getDb('document')).client;
+    const collection = (await dbMongoAtlas.getDb('document')).collection;
     const res = await collection.insertOne(data);
 
     await client.close();
@@ -71,8 +70,8 @@ async function createNewDocument(data) {
  * @return {Promise<array>} The resultset as an array.
  */
 async function updateDocument(filter, data) {
-    const client = (await dbMongoAtlas.getDb()).client;
-    const collection = (await dbMongoAtlas.getDb()).collection;
+    const client = (await dbMongoAtlas.getDb('document')).client;
+    const collection = (await dbMongoAtlas.getDb('document')).collection;
     const res = await collection.updateOne(filter, data,);
 
     await client.close();

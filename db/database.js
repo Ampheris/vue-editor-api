@@ -1,8 +1,7 @@
 const mongo = require("mongodb").MongoClient;
-const collectionName = "document";
 
 const database = {
-    getDb: async function getDb() {
+    getDb: async function getDb(collectionName) {
         let dsn = `mongodb+srv://${process.env.ATLAS_USERNAME}:${process.env.ATLAS_PASSWORD}@cluster0.jnklqgu.mongodb.net/?retryWrites=true&w=majority`;
 
         if (process.env.NODE_ENV === 'test') {

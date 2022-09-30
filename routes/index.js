@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-var search = require('../src/search.service')
+const search = require('../services/search.service')
 const ObjectId = require('mongodb').ObjectId;
-const auth = require("../models/auth.js");
+const auth = require("../services/auth.js");
 
 router.get('/', function (req, res, next) {
     const data = {
