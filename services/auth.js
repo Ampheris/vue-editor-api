@@ -3,12 +3,14 @@ const hat = require("hat");
 const validator = require("email-validator");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const {sign} = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
 
 const auth = {
     login: async function (res, body) {
         const email = body.email;
         const password = body.password;
+        let db;
         console.log(`Trying to log in: ${body.email}`);
 
         if (!email || !password) {
@@ -22,27 +24,24 @@ const auth = {
             });
         }
 
-        let db;
-
         try {
             db = await database.getDb('user');
+            let user = await db.collection.findOne({'email': email});
+            console.log(`comparing ${user.password} with ${password}`);
+            const validPassword = bcrypt.compareSync(password, user.password);
 
-            const filter = {
-                key: apiKey, users: {
-                    $elemMatch: {
-                        email: email
-                    }
-                }
-            };
 
-            const user = await db.collection.findOne(filter);
+            if (validPassword) {
+                const token = sign({result: user}, process.env.JWT_SECRET);
+                console.log("\nUser Token:\n" + token);
 
-            if (user) {
-                return auth.comparePasswords(
-                    res,
-                    password,
-                    user.users[0],
-                );
+                user.password = undefined;
+                user.token = token;
+
+                return res.status(200).json({
+                    success: 1,
+                    data: user,
+                });
             } else {
                 return res.status(401).json({
                     errors: {
@@ -99,14 +98,10 @@ const auth = {
 
             try {
                 db = await database.getDb('user');
-
-                let filter = {'email': email};
-                let updateDoc = {$set: {'content': hash}};
-
                 const userExist = await db.collection.findOne({ email: email },);
 
                 if (!userExist) {
-                    await db.collection.insertOne({'email': email, 'password': password});
+                    await db.collection.insertOne({'email': email, 'password': hash});
 
                     console.log(`added user with ${email} ${hash}`);
 
@@ -296,11 +291,17 @@ const auth = {
     },
 
     checkToken: function (req, res, next) {
-        let token = req.headers['x-access-token'];
-        let apiKey = req.query.api_key || req.body.api_key;
+        let token = req.get("authorization")
+            ? req.get("authorization")
+            : req.body.headers.Authorization;
+
 
         if (token) {
+            // remove bearer text
+            token = token.slice(7);
+
             jwt.verify(token, jwtSecret, function (err, decoded) {
+                console.log(`error: ${err}`);
                 if (err) {
                     return res.status(500).json({
                         errors: {
@@ -313,7 +314,6 @@ const auth = {
                 }
 
                 req.user = {};
-                req.user.api_key = apiKey;
                 req.user.email = decoded.email;
 
                 return next();
