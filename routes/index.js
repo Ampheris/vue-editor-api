@@ -22,9 +22,10 @@ router.post('/create',
     try {
         let name = req.body.name;
         let content = req.body.content;
+        let userId = new ObjectId(req.body.user);
         let newData = {'name': name, 'content': content}
 
-        let data = await search.createNewFile(newData);
+        let data = await search.createNewFile(newData, userId);
 
         res.status(200).json({_id: data.insertId, ...newData});
 
@@ -51,11 +52,11 @@ router.put('/update/:id',
 
 });
 
-router.get('/all',
+router.get('/all/:user',
     (req, res, next) =>
         auth.checkToken(req, res, next),
     async function (req, res, next) {
-    const files = await search.getAllFiles();
+    const files = await search.getAllFiles(req.params.user);
 
     const data = {
         files: files
