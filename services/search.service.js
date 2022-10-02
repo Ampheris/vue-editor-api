@@ -97,7 +97,6 @@ async function addPermissionForNewDoc(userId, documentId) {
         'permission': 'admin'
     }
 
-    console.log(`permission data: ${JSON.stringify(data)}`);
     const res = await collection.insertOne(data);
 
     await client.close();

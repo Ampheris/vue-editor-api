@@ -3,26 +3,37 @@
 process.env.NODE_ENV = 'test';
 
 //Require the dev-dependencies
+const searchService = require('../../services/search.service')
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+const sinon = require('sinon');
+const auth = require('../../services/auth');
+sinon.stub(auth, 'checkToken')
+    .callsFake(function (req, res, next) {
+        return next();
+    });
+
 const server = require('../../app.js');
 
 chai.should();
 
 const database = require("../../db/database.js");
+const {ObjectId} = require("mongodb");
 const collectionName = "document";
 
 chai.use(chaiHttp);
 
 let idOfDocument = '';
+let userId = new ObjectId();
 
 describe('Testing the API routes', () => {
     beforeEach(() => {
         return new Promise(async (resolve) => {
-            const db = await database.getDb();
+            const db = await database.getDb('document');
+
             let newDoc = {
                 name: 'New amazing document',
-                content: 'Amazing content'
+                content: 'Amazing content',
             };
 
             db.db.listCollections(
@@ -33,13 +44,12 @@ describe('Testing the API routes', () => {
                     if (info) {
                         await db.collection.drop();
                     }
-
                 })
                 .catch(function (err) {
                     console.error(`error: ${err}`);
                 })
                 .finally(async function () {
-                    let response = await db.collection.insertOne(newDoc);
+                    let response = await searchService.createNewFile(newDoc, userId)
                     await db.client.close();
 
                     idOfDocument = response.insertedId;
@@ -63,7 +73,8 @@ describe('Testing the API routes', () => {
         it('should create new document', (done) => {
             let newDocument = {
                 name: "Newly created document by test",
-                content: "This is a new document by test."
+                content: "This is a new document by test.",
+                user: userId,
             };
 
             chai.request(server)
@@ -75,7 +86,7 @@ describe('Testing the API routes', () => {
                         {
                             _id: res.body._id,
                             name: "Newly created document by test",
-                            content: "This is a new document by test."
+                            content: "This is a new document by test.",
                         }
                     );
 
@@ -85,7 +96,7 @@ describe('Testing the API routes', () => {
 
         it('should get all documents', (done) => {
             chai.request(server)
-                .get("/api/all")
+                .get(`/api/all/${userId}`)
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.an("object");
