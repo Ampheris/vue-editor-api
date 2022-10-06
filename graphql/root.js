@@ -2,7 +2,6 @@ const {
     GraphQLObjectType,
     GraphQLList,
     GraphQLString,
-    GraphQLInputObjectType,
 } = require('graphql');
 
 const DocumentType = require("./document.js");
