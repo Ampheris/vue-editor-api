@@ -18,6 +18,7 @@ async function findAll(userId) {
     const collection = (await dbMongoAtlas.getDb('permission')).collection;
     let user = new ObjectId(userId);
     let res = await collection.find({userRef: user}).toArray();
+
     let data = res.flatMap((dict) => {
         return dict.documentRef;
     });
@@ -51,6 +52,7 @@ async function getSpecificDocument(id) {
     const client = (await dbMongoAtlas.getDb('document')).client;
     const collection = (await dbMongoAtlas.getDb('document')).collection;
     const res = await collection.findOne({_id: id},);
+
     await client.close();
 
     return res;

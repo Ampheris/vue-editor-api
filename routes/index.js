@@ -24,7 +24,6 @@ router.post('/create',
         let content = req.body.content;
         let userId = new ObjectId(req.body.user);
         let newData = {'name': name, 'content': content}
-        console.log(`creating doc with ${userId}`);
         let data = await search.createNewFile(newData, userId);
 
         res.status(200).json({_id: data.insertId, ...newData});

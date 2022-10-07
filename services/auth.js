@@ -27,13 +27,11 @@ const auth = {
         try {
             db = await database.getDb('user');
             let user = await db.collection.findOne({'email': email});
-            console.log(`comparing ${user.password} with ${password}`);
             const validPassword = bcrypt.compareSync(password, user.password);
 
 
             if (validPassword) {
                 const token = sign({result: user}, process.env.JWT_SECRET);
-                console.log("\nUser Token:\n" + token);
 
                 user.password = undefined;
                 user.token = token;
