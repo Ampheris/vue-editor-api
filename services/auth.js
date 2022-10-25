@@ -1,10 +1,9 @@
 const database = require("../db/database.js");
-const hat = require("hat");
-const validator = require("email-validator");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {sign} = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET;
+const APIService = require('../services/search.service');
 
 const auth = {
     login: async function (res, body) {
@@ -29,12 +28,16 @@ const auth = {
             let user = await db.collection.findOne({'email': email});
             const validPassword = bcrypt.compareSync(password, user.password);
 
+            console.log(`Logged in user with id: ${user._id}`);
 
             if (validPassword) {
                 const token = sign({result: user}, process.env.JWT_SECRET);
 
                 user.password = undefined;
                 user.token = token;
+
+                await APIService.ifUserHasPendingInvite(email, user._id);
+
 
                 return res.status(200).json({
                     success: 1,
@@ -99,9 +102,15 @@ const auth = {
                 const userExist = await db.collection.findOne({ email: email },);
 
                 if (!userExist) {
-                    await db.collection.insertOne({'email': email, 'password': hash});
+                    let result = await db.collection.insertOne({'email': email, 'password': hash});
 
-                    console.log(`added user with ${email} ${hash}`);
+                    // Check if user has pending invitation
+                    try {
+                        await APIService.ifUserHasPendingInvite(email, result.insertedId);
+                    } catch (e)
+                    {
+                        console.log(`error: ${e}`);
+                    }
 
                     return res.status(201).json({
                         data: {
@@ -123,7 +132,7 @@ const auth = {
                         status: 500,
                         source: "/register",
                         title: "Database error",
-                        detail: err.message
+                        detail: err.message ?? null
                     }
                 });
             } finally {

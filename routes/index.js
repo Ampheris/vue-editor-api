@@ -3,6 +3,7 @@ const router = express.Router();
 const search = require('../services/search.service')
 const ObjectId = require('mongodb').ObjectId;
 const auth = require("../services/auth.js");
+const email = require("../services/email.service");
 
 router.get('/', function (req, res, next) {
     const data = {
@@ -85,5 +86,8 @@ router.post('/login', (req, res) =>
 
 router.post('/register', (req, res) =>
     auth.register(res, req.body));
+
+router.post('/sendEmail', (req, res) =>
+    email.sendEmail(res, req.body));
 
 module.exports = router;

@@ -81,7 +81,7 @@ async function createNewDocument(data, userId) {
 }
 
 /**
- * Creates new document in collection
+ * Creates new permission in collection
  *
  * @async
  * @throws Error when database operation fails.
@@ -105,6 +105,76 @@ async function addPermissionForNewDoc(userId, documentId) {
 
     return res;
 }
+
+/**
+ * Adds a user to an invitation list in collection
+ *
+ * @async
+ * @throws Error when database operation fails.
+ *
+ * @return
+ * @param {string} email
+ * @param {string} documentId
+ */
+async function addUserToInviteList(email, documentId) {
+    const client = (await dbMongoAtlas.getDb('invitation')).client;
+    const collection = (await dbMongoAtlas.getDb('invitation')).collection;
+    let data = {
+        'email': email,
+        'documentRef': documentId,
+        'permission': 'moderator'
+    }
+
+    const res = await collection.insertOne(data);
+
+    await client.close();
+
+    return res;
+}
+
+/**
+ * Adds permission to user if it has en pending invitation
+ *
+ * @async
+ * @throws Error when database operation fails.
+ *
+ * @return
+ * @param {string} email
+ * @param {string} userId
+ */
+async function ifUserHasPendingInvite(email, userId) {
+    const client = (await dbMongoAtlas.getDb('invitation')).client;
+    const collection = (await dbMongoAtlas.getDb('invitation')).collection;
+    let res = await collection.findOne({email: email},);
+    let documentRef = null;
+    let permission = null;
+
+    if (res) {
+        documentRef = new ObjectId(res.documentRef);
+        permission = res.permission;
+
+        await collection.deleteOne({_id: res._id});
+    }
+
+    await client.close();
+
+    if (res) {
+        const permissionClient = (await dbMongoAtlas.getDb('permission')).client;
+        const permissionCollection = (await dbMongoAtlas.getDb('permission')).collection;
+        let data = {
+            'userRef': userId,
+            'documentRef': documentRef,
+            'permission': permission
+        }
+
+        res = await permissionCollection.insertOne(data);
+
+        await permissionClient.close();
+    }
+
+    return res;
+}
+
 
 /**
  * Updates new document in collection
@@ -158,4 +228,4 @@ async function updateFile(filter, newFileData,) {
     }
 }
 
-module.exports = {getAllFiles, createNewFile, updateFile, getSpecificFile}
+module.exports = {getAllFiles, createNewFile, updateFile, getSpecificFile, addUserToInviteList, ifUserHasPendingInvite}

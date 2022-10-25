@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cors = require('cors');
+var nodemailer = require('nodemailer');
 
 const visual = true;
 const { graphqlHTTP } = require('express-graphql');
