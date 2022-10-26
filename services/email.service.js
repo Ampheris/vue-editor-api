@@ -2,16 +2,17 @@ const nodemailer = require('nodemailer');
 const APIService = require('../services/search.service');
 
 async function sendEmail(res, body) {
+    let fromEmail = 'text.editor.jsramverk@gmail.com';
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'text.editor.jsramverk@gmail.com',
+            user: fromEmail,
             pass: 'hquecpxhdcufuekg'
         }
     });
 
     let mailOptions = {
-        from: 'ampheris@gmail.com',
+        from: fromEmail,
         to: body.to,
         subject: body.subject,
         text: body.text,
